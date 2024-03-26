@@ -1,39 +1,47 @@
 cmake_minimum_required(VERSION 3.14)
-
-project(SprawdzanieSubskrypcji VERSION 1.0)
+project(YourProject VERSION 1.0)
 
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Assuming external libraries and test files are correctly placed
-# Add the subdirectory for PyBind11
+# PyBind11
 add_subdirectory(external/pybind11)
 
-##################################################################
-# FetchContent for GoogleTest
-include(FetchContent)
-
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+# Main application
+add_executable(${PROJECT_NAME} 
+    src/main.cpp
+    src/InputHandler.cpp
+    src/HtmlParser.cpp
+    src/DataProcessor.cpp
+    src/ExcelWriter.cpp
+    src/OutputHandler.cpp
 )
 
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-FetchContent_MakeAvailable(googletest)
-##################################################################
-
-# Define the main executable
-add_executable(${PROJECT_NAME} src/main.cpp)
-
-# Link against PyBind11
+# Link PyBind11
 target_link_libraries(${PROJECT_NAME} PRIVATE pybind11::embed)
 
-# If you have additional source files, make sure to include them in the add_executable call for your main application
+# Google Test
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
 
-# Define your test executable after FetchContent_MakeAvailable for GoogleTest
-# Ensure your tests directory exists and has test_project.cpp
-add_executable(my_test_suite tests/test_project.cpp)
-target_link_libraries(my_test_suite gtest_main)
+# Enable testing functionalities
+enable_testing()
+
+# Define your test executable
+add_executable(tests 
+    tests/InputHandlerTest.cpp
+    tests/ExcelWriterTest.cpp
+)
+
+# Link test executable against gtest
+target_link_libraries(tests PRIVATE gtest_main pybind11::embed)
+
+include(GoogleTest)
+gtest_discover_tests(tests)

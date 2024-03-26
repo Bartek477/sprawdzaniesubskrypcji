@@ -2,12 +2,22 @@
 #include <pybind11/embed.h> // Use pybind11 to embed Python
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <sstream>
+#include <string>
+
+std::string readHtmlFile(const std::string& filePath) {
+    std::ifstream file(filePath);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
 
 namespace py = pybind11;
 
 int main() {
     py::scoped_interpreter guard{}; // Start the Python interpreter
-
+    std::cout << "WYSTARTOWAL EHEHEHEHE:\n";
     auto parse_html = py::module_::import("parse_html").attr("parse_html");
     std::string html_content = "<html><body><a href='http://example.com'>Example</a></body></html>";
     auto links = parse_html(html_content).cast<py::list>();
